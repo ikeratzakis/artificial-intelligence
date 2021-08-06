@@ -7,7 +7,7 @@ import sys
 mask = '1111111100000000'  # The reproduction mask.We ensure fairness by copying equal amount of bits from each parent.
 colors = ['R', 'Y', 'G', 'B']  # The four allowed colours. Red,Yellow,Green,Blue.
 
-# We can implement the above adjacency matrix, as an equivalent dictionary.
+# Use a dictionary to represent the adjacent areas, as seen in map.png
 adjacency_dict = {0: [1, 2, 3, 12, 14, 15], 1: [0, 2, 4, 7, 8, 13, 14, 15], 2: [0, 1, 3, 4, 5], 3: [0, 2, 5, 12],
                   4: [1, 2, 5, 6, 8, 9],
                   5: [2, 3, 4, 6, 10, 12], 6: [4, 5, 9, 10], 7: [1, 8, 13], 8: [1, 4, 7, 9, 11, 13],
@@ -29,7 +29,7 @@ def fitness_function(population):
     # Loop through chromosomes, and check if each gene is adjacent to the ones defined in the above adjacency_dict
     for chromosome in fitness_dict:
         for gene_index, gene in enumerate(chromosome):
-            # Loop through adjacency_dict list elements
+            # Loop through adjacency_dict list elements. Can probably be made even more efficient, avoiding lists
             adj_genes = []
             for adj_index in adjacency_dict[gene_index]:
                 adj_genes.append(chromosome[adj_index])
