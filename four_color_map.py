@@ -124,16 +124,14 @@ def main():
             # Pick a random gene from each chromosome to be mutated.
             random_gene = random.randint(0, len(chromosome) - 1)
             # Create a list without the color that will be mutated.
-            new_colors = colors[:]
-            # print(new_colors)
-            # print(chromosome[random_gene])
+            new_colors = colors[:]            
             new_colors.remove(str(chromosome[random_gene]))
             # Form a new list of mutated chromosomes
             mutated_chromosome = '' + chromosome[:random_gene] + random.choice(new_colors) + chromosome[
                                                                                              random_gene + 1:]
             mutated_population.append(mutated_chromosome)
             new_colors.clear()
-            # print('Next')
+            
         # Replace chromosomes in old population with mutated ones
         new_population[0:int(pop_size / 100)] = mutated_population
         # Calculate fitness for the new population
