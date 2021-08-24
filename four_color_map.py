@@ -1,5 +1,6 @@
 from random import choice
 from itertools import chain
+import matplotlib.pyplot as plt
 import random
 import sys
 
@@ -7,7 +8,7 @@ import sys
 mask = '1111111100000000'  # The reproduction mask.We ensure fairness by copying equal amount of bits from each parent.
 colors = ['R', 'Y', 'G', 'B']  # The four allowed colours. Red,Yellow,Green,Blue.
 
-# Use a dictionary to represent the adjacent areas, as seen in map.png
+# We can implement the above adjacency matrix, as an equivalent dictionary.
 adjacency_dict = {0: [1, 2, 3, 12, 14, 15], 1: [0, 2, 4, 7, 8, 13, 14, 15], 2: [0, 1, 3, 4, 5], 3: [0, 2, 5, 12],
                   4: [1, 2, 5, 6, 8, 9],
                   5: [2, 3, 4, 6, 10, 12], 6: [4, 5, 9, 10], 7: [1, 8, 13], 8: [1, 4, 7, 9, 11, 13],
@@ -29,7 +30,7 @@ def fitness_function(population):
     # Loop through chromosomes, and check if each gene is adjacent to the ones defined in the above adjacency_dict
     for chromosome in fitness_dict:
         for gene_index, gene in enumerate(chromosome):
-            # Loop through adjacency_dict list elements. Can probably be made even more efficient, avoiding lists
+            # Loop through adjacency_dict list elements
             adj_genes = []
             for adj_index in adjacency_dict[gene_index]:
                 adj_genes.append(chromosome[adj_index])
@@ -83,8 +84,6 @@ def weighted_choice(population):
 
 def main():
     # Generate initial population and fitness score
-    # Add a counter to count number of generations passed
-
     generations_passed = 0
     pop_size = int(sys.argv[1]) if len(sys.argv) > 1 else 500
     init_population = generate_initialpop(pop_size)
@@ -94,7 +93,8 @@ def main():
     prod_chromosomes = []
     children = []
     new_population = []
-
+    average_fitness = []  # List of average fitness to show convergence speed
+    max_fitness = []  # List of max fitness encountered in each generation
     # Loop until fitness max is met.
     while max(fitness.values()) < 16:
         print('Iterating')
@@ -124,35 +124,37 @@ def main():
             # Pick a random gene from each chromosome to be mutated.
             random_gene = random.randint(0, len(chromosome) - 1)
             # Create a list without the color that will be mutated.
-            new_colors = colors[:]            
+            new_colors = colors[:]
             new_colors.remove(str(chromosome[random_gene]))
             # Form a new list of mutated chromosomes
             mutated_chromosome = '' + chromosome[:random_gene] + random.choice(new_colors) + chromosome[
                                                                                              random_gene + 1:]
             mutated_population.append(mutated_chromosome)
             new_colors.clear()
-            
+
         # Replace chromosomes in old population with mutated ones
         new_population[0:int(pop_size / 100)] = mutated_population
         # Calculate fitness for the new population
         fitness = fitness_function(new_population)
-        # Clear lists to avoid memory leak
+        # Clear lists
         prod_chromosomes = []
         children = []
-        # Calculate average fitness for the fitness dictionary
-        count = 0
-        _sum = 0
-        for key in fitness:
-            count += 1
-            _sum += fitness[key]
         # Print results
+        current_average_fitness = sum(x for x in fitness.values()) / len(fitness)
+        average_fitness.append(current_average_fitness)
+        max_fitness.append(max(fitness.values()))
         print("New population length is: ", len(new_population))
         print(fitness)
-        print('Average fitness: ', _sum / count)
+        print('Average fitness: ', current_average_fitness)
         print('Max fitness: ', max(fitness.values()))
     print("Winning chromosome: ", max(fitness, key=fitness.get), "Fitness is: ", max(fitness.values()))
     print("Generations passed: ", generations_passed)
     print("Initial population was: ", pop_size)
+    # Plot convergence graph
+    plt.plot(range(generations_passed), average_fitness, label='Average fitness'), plt.xlabel('Generation')
+    plt.ylabel('Fitness'), plt.plot(range(generations_passed), max_fitness, label='Max fitness'), plt.legend()
+    plt.title('Convergence speed')
+    plt.show()
 
 
 main()
